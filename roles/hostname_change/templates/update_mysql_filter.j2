@@ -1,0 +1,4 @@
+use filter;
+update outgoing_ipv4_interfaces set host='{{new_hostname}}' where host='{{old_hostname}}';
+update relays set quarantine_server='{{new_hostname}}' where quarantine_server='{{old_hostname}}';
+update relays set logging_server='{{new_hostname}}' where logging_server='{{old_hostname}}';

@@ -1,2 +1,2 @@
-# Hostname_change
-Standard fix for hostname change. 
+# Ansible_Std
+Standard framework for Ansible. 

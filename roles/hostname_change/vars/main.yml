@@ -1,0 +1,16 @@
+# New hostname for local clouds
+# rev.1.0
+
+old_hostname: 'inbound2.outlook2go.command'
+new_hostname: 'inbound.outlook2go.com'
+unix_socket: 'var/run/mysqld/mysqld.sock'
+database: 'spampanel'
+api_user: 'apiuser'
+localhost: 'localhost'
+cluster_dns: outlook2go.com
+server_list: requests.get(’https://cluster-api.seinternal.com/api/cluster/outlook2go.com/hosts').json()[‘hosts’]
+domain: str(requests.get('https://cluster-api.seinternal.com/api/cluster/outlook2go.com/hosts').json()['api_server']).split('.')[1]
+local_domains: requests.get('https://cluster-api.seinternal.com/api/cluster/outlook2go.com').json()['configuration'].split('\n')[1].split('=')[1]
+username: "vasilica.budica"
+password: "xxxXXXxxx"
+apiurl: "https://monitor.seinternal.com/api_jsonrpc.php'"
