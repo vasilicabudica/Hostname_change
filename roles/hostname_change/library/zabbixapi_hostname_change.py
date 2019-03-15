@@ -1,21 +1,29 @@
 
-from ansible.module_utils.basic import *
+#!usr/bin/env python
+# Author, Vasilica Budica (vasilica.budica@solarwinds.com)
+
 import json
 import request
 
-def HostnameChange(Changing hostname using zabbix api):
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            api_url=str(required=True),
+            username=str(required=True),
+            password=str(required=True),
+            oldhost=str(required=True),
+            newhostname=str(required=True)
+        ),
+        supports_check_mode=True
+    )
 
-if __name__ == '__main__':
-    main()
+    module.exit_json(changed=True)
 
-fileds = {
-    "api_url" : {"required": "True", "type": "str"},
-    "username": {"required": "True", "type": "str"},
-    "password": {"required": "True", "type": "str"},
-    "oldhost": {"required": "True", "type": "str"},
-    "newhostname": {"required": "True", "type": "str"}
-    }
-}
+api_url = module.params['api_url']
+username = module.params['username']
+password = module.params['password']
+oldhost = module.params['oldhost']
+newhostname = module.params['newhostname']
 
 # Reguest login to retrive auth
 out_auth = requests.get(api_url,
@@ -47,7 +55,7 @@ x = requests.get(api_url,
                          "id": 1
                  }))
 hostid = json.loads(json.dumps(x.json()['result'][0]))['hostid']
-tls_psk_identity = json.loads(json.dumps(x.json()['result'][0]))['tls_psk_identity'].split('_')[1]
+tls_psk_identity = newhostname + '_' + json.loads(json.dumps(x.json()['result'][0]))['tls_psk_identity'].split('_')[1]
 
 # Post a api request to change the name of the server
 z = requests.post('https://monitor.seinternal.com/api_jsonrpc.php',
@@ -59,7 +67,10 @@ z = requests.post('https://monitor.seinternal.com/api_jsonrpc.php',
                              "hostid": hostid,
                              "host": new_hostname,
                              "name": newhostname,
-                             "tls_psk_identity": newhostname+ '_' + tls_psk_identity
+                             "tls_psk_identity": tls_psk_identity,
                          "auth": auth,
                          "id": 1
                  }))
+
+from ansible.module_utils.basic import *
+main()

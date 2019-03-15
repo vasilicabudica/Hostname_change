@@ -1,38 +1,16 @@
-tasks:
-
 # 1 - 3. Run api to update hostname confguration
 - name: Run api to update hostname confguration
   uri:
    url: curl -k https://cluster-api.seinternal.com/api/cluster/{{ new_hostname.split('.')[1] }}/ -d "{'master:' '\"{{ new_hostname }}\"'}"
 
-# 4,6. Set the new server hostname in (/etc/hostname, /etc/hosts, /root/salt_setup/pillar/data.sls)
-- replace:
-    path: "{{ item }}"
-    regexp: "{{ old_hostname }}"
-    replace: "{{ new_hostname }}"
-    backup: yes
-    loop:
-    - "/etc/hosts"
-    - "/root/salt_setup/pillar/data.sls"
-    - "/etc/hostname"
-    - "/etc/spamexperts/spampanel.conf"
-    - "/etc/spamexperts/backup"
-    - "/etc/zabbix/zabbix_agentd.conf"
-
 # 5. Run the updater
 - name: Run the updater
-  command: "{{ item }}"
-  loop:
-  - "/home/spamexperts/update/update -d --skip-wait-turn --skip-version-check
-  --skip-apt --skip-restart --skip-cron --skip-applications --skip-pip
-  --skip-pip-cache --skip-preupdate --skip-postupdate --skip-salt
-  --skip-preupdate-migrations --skip-postupdate-migrations"
+  command: "/home/spamexperts/update/update -d --skip-wait-turn --skip-version-check --skip-apt --skip-restart --skip-cron --skip-applications --skip-pip --skip-pip-cache --skip-preupdate --skip-postupdate --skip-salt --skip-preupdate-migrations --skip-postupdate-migrations"
 
 # 7 - 9. Update database with new entries
 - template:
     dest: /root/update_mysql_filter.sql
-    src: update_mysql_filter.j2
-
+    src: /home/vasilica.budica/Hostname_change/roles/hostname_change/templates/update_mysql_filter.j2
 
 - mysql_db:
     state: import
@@ -46,11 +24,11 @@ tasks:
 # 11. Restart services so that the configuration loads with new hostname
 - name: Services restart
   service:
-    name: "{{ item }}"
+    name: exim4
     state: restarted
-    loop:
-    - "pdns-recursor"
-    - "exim4"
+  loop:
+    - pdns-recursor
+    - exim4
     - "exim4-outgoing"
     - "cron"
     - "zabbix-agent"
